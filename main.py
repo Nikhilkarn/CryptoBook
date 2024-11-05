@@ -1,13 +1,10 @@
 # main.py
 from crypto_utils import generate_key
-from password_manager import init_db, add_credential, get_credential
+from password_manager import add_credential, get_credential
 from password_generator import generate_password
 
 def main():
     print("Welcome to CryptoPocket_Py!")
-
-    # Initialize database
-    init_db()
 
     # Generate or load encryption key
     key = generate_key()

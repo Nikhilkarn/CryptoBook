@@ -1,43 +1,40 @@
-import sqlite3
+from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
 from crypto_utils import encrypt_message, decrypt_message
 
-DB_PATH = 'data/credentials.db'
+uri = "mongodb+srv://admin:admin13@crypto.vn67a.mongodb.net/?retryWrites=true&w=majority&appName=crypto"
 
-def init_db():
-    """Initializes the database for storing encrypted credentials."""
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS credentials (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            service TEXT,
-            username TEXT,
-            encrypted_password BLOB
-        )
-    ''')
-    conn.commit()
-    conn.close()
+# Create a new client and connect to the server
+client = MongoClient(uri, server_api=ServerApi('1'))
+
+# Send a ping to confirm a successful connection
+try:
+    client.admin.command('ping')
+    print("Pinged your deployment. You successfully connected to MongoDB!")
+except Exception as e:
+    print(e)
+
+# Database and collection setup
+db = client["crypto"]
+collection = db["credentials"]
 
 def add_credential(service, username, password, key):
     """Adds an encrypted credential to the database."""
     encrypted_password = encrypt_message(key, password)
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-    c.execute('INSERT INTO credentials (service, username, encrypted_password) VALUES (?, ?, ?)',
-              (service, username, encrypted_password))
-    conn.commit()
-    conn.close()
+    document = {
+        "service": service,
+        "username": username,
+        "encrypted_password": encrypted_password
+    }
+    collection.insert_one(document)
 
 def get_credential(service, key):
     """Retrieves and decrypts the credential for a given service."""
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-    c.execute('SELECT username, encrypted_password FROM credentials WHERE service = ?', (service,))
-    result = c.fetchone()
-    conn.close()
+    result = collection.find_one({"service": service})
 
     if result:
-        username, encrypted_password = result
+        username = result["username"]
+        encrypted_password = result["encrypted_password"]
         password = decrypt_message(key, encrypted_password)
         return username, password
     return None
