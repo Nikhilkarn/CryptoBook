@@ -2,24 +2,20 @@
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 from crypto_utils import generate_key, encrypt_message, decrypt_message
-from password_manager import add_credential, get_credential, init_db
+from password_manager import add_credential, get_credential
 from password_generator import generate_password
-from file_encryptor import encrypt_file, decrypt_file
+from file_encryptor import encrypt_file, decrypt_file 
 
-# Initialize key for encryption
 key = generate_key()
 
-# Main GUI Window
 class CryptoPocketApp:
     def __init__(self, root):
         self.root = root
         self.root.title("CryptoPocket")
         
-        # Notebook for Tabs
         notebook = ttk.Notebook(root)
         notebook.pack(expand=True, fill="both")
         
-        # Add Tabs
         self.create_credential_tab(notebook)
         self.create_text_encryption_tab(notebook)
         self.create_file_encryption_tab(notebook)
@@ -97,12 +93,12 @@ class CryptoPocketApp:
 
     def encrypt_file(self):
         if hasattr(self, 'file_path') and self.file_path:
-            encrypt_file(self.file_path, key)
+            encrypt_file(key, self.file_path)
             messagebox.showinfo("Success", "File encrypted successfully")
 
     def decrypt_file(self):
         if hasattr(self, 'file_path') and self.file_path:
-            decrypt_file(self.file_path, key)
+            decrypt_file(key, self.file_path)
             messagebox.showinfo("Success", "File decrypted successfully")
 
 if __name__ == '__main__':
