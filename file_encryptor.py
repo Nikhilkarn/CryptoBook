@@ -1,4 +1,3 @@
-import os
 from crypto_utils import encrypt_message, decrypt_message
 
 def encrypt_file(key, file_path):
@@ -6,19 +5,21 @@ def encrypt_file(key, file_path):
     with open(file_path, 'rb') as f:
         data = f.read()
     
-    encrypted_data = encrypt_message(key, data.decode('utf-8'))
+    ciphertext, iv, tag = encrypt_message(key, data.decode('utf-8'))
     
     with open(file_path + '.enc', 'wb') as f:
-        f.write(encrypted_data)
-    
+        f.write(iv + tag + ciphertext)  
+
     print(f"File '{file_path}' encrypted successfully as '{file_path}.enc'")
 
 def decrypt_file(key, encrypted_file_path):
     """Decrypts a '.enc' file and restores the original file."""
     with open(encrypted_file_path, 'rb') as f:
-        encrypted_data = f.read()
+        iv = f.read(12)    
+        tag = f.read(16)   
+        ciphertext = f.read()  
     
-    decrypted_data = decrypt_message(key, encrypted_data)
+    decrypted_data = decrypt_message(key, ciphertext, iv, tag)
     
     original_file_path = encrypted_file_path.replace('.enc', '')
     with open(original_file_path, 'w') as f:
