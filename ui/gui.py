@@ -1,12 +1,11 @@
 # gui.py
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
-from crypto_utils import generate_key, encrypt_message, decrypt_message
+from encryption_decryption.caesar_cipher import caesar_encrypt, caesar_decrypt
+from encryption_decryption.xor_cipher import xor_encrypt, xor_decrypt
+from encryption_decryption.substitution_cipher import substitution_encrypt, substitution_decrypt
 from password_manager import add_credential, get_credential
 from password_generator import generate_password
-from file_encryptor import encrypt_file, decrypt_file 
-
-key = generate_key()
 
 class CryptoPocketApp:
     def __init__(self, root):
@@ -18,7 +17,6 @@ class CryptoPocketApp:
         
         self.create_credential_tab(notebook)
         self.create_text_encryption_tab(notebook)
-        self.create_file_encryption_tab(notebook)
         
     def create_credential_tab(self, notebook):
         credential_frame = ttk.Frame(notebook)
@@ -46,60 +44,56 @@ class CryptoPocketApp:
         self.text_entry = tk.Text(text_frame, width=40, height=10)
         self.text_entry.grid(row=1, column=0, padx=5, pady=5, columnspan=2)
 
-        ttk.Button(text_frame, text="Encrypt", command=self.encrypt_text).grid(row=2, column=0, pady=5)
-        ttk.Button(text_frame, text="Decrypt", command=self.decrypt_text).grid(row=2, column=1, pady=5)
+        self.encryption_method = ttk.Combobox(text_frame, values=["Caesar Cipher", "XOR Cipher", "Substitution Cipher"])
+        self.encryption_method.grid(row=2, column=0, padx=5, pady=5)
+        self.encryption_method.set("Caesar Cipher")
+
+        ttk.Button(text_frame, text="Encrypt", command=self.encrypt_text).grid(row=3, column=0, pady=5)
+        ttk.Button(text_frame, text="Decrypt", command=self.decrypt_text).grid(row=3, column=1, pady=5)
     
-    def create_file_encryption_tab(self, notebook):
-        file_frame = ttk.Frame(notebook)
-        notebook.add(file_frame, text="Encrypt File")
-
-        ttk.Button(file_frame, text="Choose File", command=self.select_file).grid(row=0, column=0, padx=5, pady=5)
-        ttk.Button(file_frame, text="Encrypt File", command=self.encrypt_file).grid(row=1, column=0, padx=5, pady=5)
-        ttk.Button(file_frame, text="Decrypt File", command=self.decrypt_file).grid(row=1, column=1, padx=5, pady=5)
-
     def add_credential(self):
         service = self.service_entry.get()
         username = self.username_entry.get()
         password = self.password_entry.get()
         if service and username and password:
-            add_credential(service, username, password, key)
+            add_credential(service, username, password)
             messagebox.showinfo("Success", "Credential added successfully")
         else:
             messagebox.showerror("Error", "Please fill in all fields")
 
     def encrypt_text(self):
         message = self.text_entry.get("1.0", tk.END).strip()
-        if message:
-            encrypted_message = encrypt_message(key, message)
-            self.text_entry.delete("1.0", tk.END)
-            self.text_entry.insert(tk.END, encrypted_message)
-        else:
-            messagebox.showerror("Error", "Please enter text to encrypt")
+        method = self.encryption_method.get()
+        
+        if method == "Caesar Cipher":
+            shift = 3  # Fixed shift value for demo
+            encrypted_message = caesar_encrypt(message, shift)
+        elif method == "XOR Cipher":
+            key = 5  # Fixed key value for demo
+            encrypted_message = xor_encrypt(message, key)
+        elif method == "Substitution Cipher":
+            key = 'keyword'  # Fixed keyword for demo
+            encrypted_message = substitution_encrypt(message, key)
+        
+        self.text_entry.delete("1.0", tk.END)
+        self.text_entry.insert(tk.END, encrypted_message)
 
     def decrypt_text(self):
         encrypted_message = self.text_entry.get("1.0", tk.END).strip()
-        if encrypted_message:
-            try:
-                decrypted_message = decrypt_message(key, encrypted_message)
-                self.text_entry.delete("1.0", tk.END)
-                self.text_entry.insert(tk.END, decrypted_message)
-            except:
-                messagebox.showerror("Error", "Decryption failed. Incorrect key or invalid text.")
-
-    def select_file(self):
-        self.file_path = filedialog.askopenfilename()
-        if not self.file_path:
-            messagebox.showerror("Error", "No file selected")
-
-    def encrypt_file(self):
-        if hasattr(self, 'file_path') and self.file_path:
-            encrypt_file(key, self.file_path)
-            messagebox.showinfo("Success", "File encrypted successfully")
-
-    def decrypt_file(self):
-        if hasattr(self, 'file_path') and self.file_path:
-            decrypt_file(key, self.file_path)
-            messagebox.showinfo("Success", "File decrypted successfully")
+        method = self.encryption_method.get()
+        
+        if method == "Caesar Cipher":
+            shift = 3
+            decrypted_message = caesar_decrypt(encrypted_message, shift)
+        elif method == "XOR Cipher":
+            key = 5
+            decrypted_message = xor_decrypt(encrypted_message, key)
+        elif method == "Substitution Cipher":
+            key = 'keyword'
+            decrypted_message = substitution_decrypt(encrypted_message, key)
+        
+        self.text_entry.delete("1.0", tk.END)
+        self.text_entry.insert(tk.END, decrypted_message)
 
 if __name__ == '__main__':
     root = tk.Tk()

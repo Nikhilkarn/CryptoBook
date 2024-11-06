@@ -1,9 +1,8 @@
-from crypto_utils import generate_key, encrypt_message, decrypt_message
+from encryption_decryption.caesar_cipher import caesar_encrypt, caesar_decrypt
+from encryption_decryption.xor_cipher import xor_encrypt, xor_decrypt
+from encryption_decryption.substitution_cipher import substitution_encrypt, substitution_decrypt
 from password_manager import add_credential, verify_credential
 from password_generator import generate_password
-from file_encryptor import encrypt_file, decrypt_file
-
-encryption_key = generate_key()
 
 def main():
     print("Welcome to CryptoPocket_Py!")
@@ -15,9 +14,7 @@ def main():
         print("3. Generate a random password")
         print("4. Encrypt text")
         print("5. Decrypt text")
-        print("6. Encrypt a file")
-        print("7. Decrypt a file")
-        print("8. Exit")
+        print("6. Exit")
         
         choice = input("Choose an option: ")
 
@@ -26,7 +23,7 @@ def main():
             username = input("Username: ")
             password = input("Password: ")
             add_credential(service, username, password)
-            print("Credential added and hashed successfully.")
+            print("Credential added successfully.")
 
         elif choice == '2':
             service = input("Service Name: ")
@@ -43,28 +40,43 @@ def main():
 
         elif choice == '4':
             message = input("Enter text to encrypt: ")
-            ciphertext, iv, tag = encrypt_message(encryption_key, message)
-            print(f"Encrypted Text: {ciphertext}\nIV: {iv}\nTag: {tag}")
+            method = input("Choose encryption method (Caesar, XOR, Substitution): ").strip().lower()
+
+            if method == "caesar":
+                shift = int(input("Enter shift value: "))
+                encrypted_message = caesar_encrypt(message, shift)
+            elif method == "xor":
+                key = int(input("Enter XOR key: "))
+                encrypted_message = xor_encrypt(message, key)
+            elif method == "substitution":
+                key = input("Enter substitution key: ")
+                encrypted_message = substitution_encrypt(message, key)
+            else:
+                print("Invalid encryption method.")
+                continue
+
+            print("Encrypted Text:", encrypted_message)
 
         elif choice == '5':
-            ciphertext = input("Enter encrypted text to decrypt: ")
-            iv = input("Enter IV: ")
-            tag = input("Enter Tag: ")
-            try:
-                decrypted_message = decrypt_message(encryption_key, bytes.fromhex(ciphertext), bytes.fromhex(iv), bytes.fromhex(tag))
-                print("Decrypted Text:", decrypted_message)
-            except:
-                print("Decryption failed. Incorrect key or invalid text.")
+            encrypted_message = input("Enter encrypted text to decrypt: ")
+            method = input("Choose decryption method (Caesar, XOR, Substitution): ").strip().lower()
+
+            if method == "caesar":
+                shift = int(input("Enter shift value: "))
+                decrypted_message = caesar_decrypt(encrypted_message, shift)
+            elif method == "xor":
+                key = int(input("Enter XOR key: "))
+                decrypted_message = xor_decrypt(encrypted_message, key)
+            elif method == "substitution":
+                key = input("Enter substitution key: ")
+                decrypted_message = substitution_decrypt(encrypted_message, key)
+            else:
+                print("Invalid decryption method.")
+                continue
+
+            print("Decrypted Text:", decrypted_message)
 
         elif choice == '6':
-            file_path = input("Enter the file path to encrypt: ")
-            encrypt_file(encryption_key, file_path)
-
-        elif choice == '7':
-            encrypted_file_path = input("Enter the encrypted file path to decrypt: ")
-            decrypt_file(encryption_key, encrypted_file_path)
-
-        elif choice == '8':
             print("Exiting CryptoPocket_Py.")
             break
         else:
