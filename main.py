@@ -99,9 +99,10 @@ class CryptoPocketApp:
         if cipher == "Caesar Cipher":
             encrypted = caesar_encrypt(text, 3)  # Adjust shift as needed
         elif cipher == "XOR Cipher":
-            encrypted = xor_encrypt(text, "key")  # Replace "key" with the actual key
+            encrypted = xor_encrypt(text, "key")  # We can replace "key" with any other actual key
         elif cipher == "Substitution Cipher":
-            encrypted = substitution_encrypt(text)
+            key = "anykey"  # We can replace "key" with any other actual key
+            encrypted = substitution_encrypt(text, key)
         else:
             messagebox.showwarning("Warning", "Select a valid cipher")
             return
@@ -116,7 +117,8 @@ class CryptoPocketApp:
         elif cipher == "XOR Cipher":
             decrypted = xor_decrypt(text, "key")  # Replace "key" with the actual key
         elif cipher == "Substitution Cipher":
-            decrypted = substitution_decrypt(text)
+            key = "anykey"  # Ensure the same key is used for decryption
+            decrypted = substitution_decrypt(text, key)
         else:
             messagebox.showwarning("Warning", "Select a valid cipher")
             return
@@ -134,10 +136,10 @@ class CryptoPocketApp:
         select_file_btn = ttk.Button(frame, text="Select File", command=lambda: self.select_file(file_label))
         select_file_btn.pack(pady=10)
 
-        encrypt_file_btn = ttk.Button(frame, text="Encrypt File", command=lambda: self.encrypt_file(file_label))
+        encrypt_file_btn = ttk.Button(frame, text="Encrypt File", command=self.encrypt_selected_file)
         encrypt_file_btn.pack(pady=10)
 
-        decrypt_file_btn = ttk.Button(frame, text="Decrypt File", command=lambda: self.decrypt_file(file_label))
+        decrypt_file_btn = ttk.Button(frame, text="Decrypt File", command=self.decrypt_selected_file)
         decrypt_file_btn.pack(pady=10)
 
     def select_file(self, file_label):
@@ -146,16 +148,18 @@ class CryptoPocketApp:
         if file_path:
             file_label.config(text=f"Selected: {file_path.split('/')[-1]}")
 
-    def encrypt_file(self, file_label):
+    def encrypt_selected_file(self):
         if hasattr(self, 'selected_file'):
-            encrypt_file(self.selected_file)
+            key = "yourencryptionkey"  # Replace with your actual encryption key
+            encrypt_file(key, self.selected_file)
             messagebox.showinfo("Success", "File encrypted successfully!")
         else:
             messagebox.showwarning("Warning", "Please select a file first")
 
-    def decrypt_file(self, file_label):
+    def decrypt_selected_file(self):
         if hasattr(self, 'selected_file'):
-            decrypt_file(self.selected_file)
+            key = "yourencryptionkey"  # Ensure the same key is used for decryption
+            decrypt_file(key, self.selected_file)
             messagebox.showinfo("Success", "File decrypted successfully!")
         else:
             messagebox.showwarning("Warning", "Please select a file first")
